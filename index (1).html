@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>РАДАР — работа курьером с бесплатным обучением</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#131E22;
+    --ink-soft:#1C2B31;
+    --paper:#EFEEE4;
+    --paper-2:#E5E3D6;
+    --slate:#5C6A66;
+    --slate-light: rgba(239,238,228,0.62);
+    --signal:#7FA88F;
+    --signal-dim: rgba(127,168,143,0.28);
+    --ping:#C4622F;
+    --line: rgba(19,30,34,0.14);
+    --line-dark: rgba(239,238,228,0.16);
+    --display: 'Newsreader', serif;
+    --body: 'IBM Plex Sans', sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:var(--body);
+    background:var(--paper);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  img,svg{display:block;max-width:100%;}
+  a{color:inherit;text-decoration:none;}
+  ul{list-style:none;}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:0 32px;}
+  @media (max-width:640px){ .wrap{padding:0 20px;} }
+
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--slate);
+    display:flex;align-items:center;gap:10px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:6px;height:6px;border-radius:50%;
+    background:var(--signal);
+    box-shadow:0 0 0 3px var(--signal-dim);
+    flex-shrink:0;
+  }
+  .eyebrow.on-dark{color:var(--slate-light);}
+
+  h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;letter-spacing:-0.01em;}
+
+  /* ---------- Header ---------- */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(239,238,228,0.86);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{
+    display:flex;align-items:center;justify-content:space-between;
+    height:76px;
+  }
+  .logo{
+    font-family:var(--mono);font-weight:500;font-size:17px;letter-spacing:0.06em;
+    display:flex;align-items:center;gap:10px;
+  }
+  .logo .dot{
+    width:9px;height:9px;border-radius:50%;background:var(--ping);
+    animation:pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(196,98,47,0.35);}50%{box-shadow:0 0 0 6px rgba(196,98,47,0);}}
+  .nav-links{display:flex;gap:36px;font-size:14.5px;}
+  .nav-links a{color:var(--ink);position:relative;padding:4px 0;}
+  .nav-links a::after{
+    content:"";position:absolute;left:0;bottom:0;width:0;height:1px;background:var(--ink);
+    transition:width .25s ease;
+  }
+  .nav-links a:hover::after{width:100%;}
+  .nav-cta{
+    font-family:var(--mono);font-size:13px;letter-spacing:0.03em;
+    background:var(--ink);color:var(--paper);
+    padding:11px 20px;border-radius:2px;
+    border:1px solid var(--ink);
+    transition:background .2s, color .2s;
+  }
+  .nav-cta:hover{background:transparent;color:var(--ink);}
+  .burger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:8px;}
+  .burger span{width:22px;height:2px;background:var(--ink);display:block;}
+  .mobile-menu{display:none;}
+
+  @media (max-width:860px){
+    .nav-links{display:none;}
+    .nav-cta{display:none;}
+    .burger{display:flex;}
+    .mobile-menu.open{
+      display:flex;flex-direction:column;
+      padding:8px 0 24px;border-top:1px solid var(--line);
+      gap:2px;
+    }
+    .mobile-menu a{padding:14px 0;font-size:15px;border-bottom:1px solid var(--line);}
+    .mobile-menu .nav-cta{display:block;text-align:center;margin-top:14px;}
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    background:var(--ink);color:var(--paper);
+    position:relative;overflow:hidden;
+    padding:88px 0 0;
+  }
+  .hero-top{
+    display:grid;grid-template-columns:1.15fr 0.85fr;gap:48px;align-items:start;
+    position:relative;z-index:2;padding-bottom:64px;
+  }
+  @media (max-width:900px){ .hero-top{grid-template-columns:1fr;} }
+
+  .hero h1{
+    font-size:clamp(34px,5vw,60px);
+    margin:22px 0 26px;
+    max-width:15ch;
+  }
+  .hero h1 em{font-style:italic;color:var(--signal);}
+  .hero p.lede{
+    font-size:17px;line-height:1.6;color:var(--slate-light);
+    max-width:46ch;margin-bottom:34px;
+  }
+  .hero-ctas{display:flex;gap:14px;flex-wrap:wrap;}
+  .btn-primary{
+    font-family:var(--mono);font-size:13.5px;letter-spacing:0.03em;
+    background:var(--signal);color:var(--ink);
+    padding:15px 26px;border-radius:2px;border:1px solid var(--signal);
+    transition:transform .18s ease, box-shadow .18s ease;
+    display:inline-flex;align-items:center;gap:8px;
+    cursor:pointer;
+  }
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(127,168,143,0.28);}
+  .btn-ghost{
+    font-family:var(--mono);font-size:13.5px;letter-spacing:0.03em;
+    color:var(--paper);padding:15px 22px;border-radius:2px;
+    border:1px solid var(--line-dark);
+    transition:border-color .2s, background .2s;
+  }
+  .btn-ghost:hover{border-color:var(--paper);}
+
+  /* income calculator — hero signature element */
+  .calc{
+    background:var(--ink-soft);border:1px solid var(--line-dark);border-radius:3px;
+    padding:28px 26px 30px;
+  }
+  .calc-label{font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--slate-light);margin-bottom:18px;}
+  .calc-transport{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap;}
+  .t-btn{
+    font-family:var(--mono);font-size:12.5px;padding:9px 14px;border-radius:2px;
+    border:1px solid var(--line-dark);background:transparent;color:var(--slate-light);
+    cursor:pointer;transition:all .18s ease;
+  }
+  .t-btn.active{background:var(--signal);color:var(--ink);border-color:var(--signal);}
+  .calc-slider-row{margin-bottom:6px;}
+  .calc-slider-row .hours-out{font-family:var(--mono);font-size:13px;color:var(--signal);}
+  input[type="range"]{
+    width:100%;-webkit-appearance:none;height:2px;background:var(--line-dark);
+    margin:16px 0 22px;border-radius:2px;
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+    background:var(--signal);cursor:pointer;border:3px solid var(--ink-soft);
+  }
+  input[type="range"]::-moz-range-thumb{
+    width:16px;height:16px;border-radius:50%;background:var(--signal);cursor:pointer;border:3px solid var(--ink-soft);
+  }
+  .calc-result{border-top:1px solid var(--line-dark);padding-top:20px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .calc-result-item .num{font-family:var(--display);font-size:30px;color:var(--paper);}
+  .calc-result-item .num span{color:var(--signal);}
+  .calc-result-item .lbl{font-family:var(--mono);font-size:10.5px;color:var(--slate-light);margin-top:4px;letter-spacing:0.03em;}
+  .calc-note{font-size:11.5px;color:var(--slate-light);margin-top:16px;line-height:1.5;}
+
+  .hero-stats{
+    display:grid;grid-template-columns:repeat(4,1fr);
+    border-top:1px solid var(--line-dark);
+    padding:26px 0;gap:20px;
+  }
+  @media (max-width:900px){ .hero-stats{grid-template-columns:repeat(2,1fr);} }
+  .stat-num{font-family:var(--display);font-size:26px;color:var(--paper);}
+  .stat-num span{color:var(--signal);}
+  .stat-label{font-family:var(--mono);font-size:11px;letter-spacing:0.04em;color:var(--slate-light);margin-top:6px;line-height:1.4;}
+
+  /* ---------- Section shells ---------- */
+  section{padding:96px 0;}
+  .section-head{max-width:640px;margin-bottom:56px;}
+  .section-head h2{font-size:clamp(28px,3.4vw,40px);margin-top:16px;}
+  .section-head p{color:var(--slate);font-size:15.5px;line-height:1.6;margin-top:16px;max-width:52ch;}
+
+  /* ---------- Process ---------- */
+  .process{background:var(--ink);color:var(--paper);}
+  .process .section-head p{color:var(--slate-light);}
+  .process-list{border-top:1px solid var(--line-dark);}
+  .process-item{
+    display:grid;grid-template-columns:70px 1fr 1.4fr;gap:24px;
+    padding:30px 0;border-bottom:1px solid var(--line-dark);
+    align-items:baseline;
+  }
+  @media (max-width:760px){
+    .process-item{grid-template-columns:50px 1fr;}
+    .process-item .p-desc{grid-column:1/-1;}
+  }
+  .process-item .p-num{font-family:var(--mono);color:var(--signal);font-size:14px;}
+  .process-item h3{font-size:21px;font-weight:500;}
+  .process-item .p-desc{color:var(--slate-light);font-size:14.5px;line-height:1.6;}
+
+  /* ---------- Why ---------- */
+  .why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:36px;}
+  @media (max-width:860px){ .why-grid{grid-template-columns:1fr;} }
+  .why-item{border-top:1px solid var(--line);padding-top:20px;}
+  .why-item h3{font-size:18px;margin-bottom:10px;font-family:var(--body);font-weight:600;}
+  .why-item p{font-size:14.5px;color:var(--slate);line-height:1.6;}
+
+  /* ---------- Requirements ---------- */
+  .req-wrap{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);}
+  @media (max-width:760px){ .req-wrap{grid-template-columns:1fr;} }
+  .req-card{background:var(--paper);padding:36px 32px;}
+  .req-card h3{font-size:19px;font-family:var(--body);font-weight:600;margin-bottom:18px;}
+  .req-list li{
+    font-size:14.5px;color:var(--slate);line-height:1.7;padding-left:20px;position:relative;margin-bottom:6px;
+  }
+  .req-list li::before{content:"—";position:absolute;left:0;color:var(--ping);}
+
+  /* ---------- Testimonials ---------- */
+  .testimonials{background:var(--paper-2);}
+  .test-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);}
+  @media (max-width:860px){ .test-grid{grid-template-columns:1fr;} }
+  .test-card{background:var(--paper-2);padding:34px 28px;}
+  .test-card blockquote{font-family:var(--display);font-style:italic;font-size:17.5px;line-height:1.5;margin-bottom:20px;}
+  .test-card .who{font-family:var(--mono);font-size:11.5px;color:var(--slate);letter-spacing:0.02em;}
+
+  /* ---------- CTA banner ---------- */
+  .cta-banner{
+    background:var(--ink);color:var(--paper);text-align:center;
+    padding:100px 0;position:relative;
+  }
+  .cta-banner h2{font-size:clamp(28px,4.4vw,46px);max-width:18ch;margin:0 auto 30px;}
+  .cta-banner .btn-primary{margin:0 auto;}
+
+  /* ---------- Contact / Footer ---------- */
+  footer{padding:90px 0 40px;}
+  .footer-grid{display:grid;grid-template-columns:0.9fr 1.1fr;gap:64px;}
+  @media (max-width:860px){ .footer-grid{grid-template-columns:1fr;gap:48px;} }
+  .footer-info h2{font-size:clamp(26px,3.2vw,34px);margin-bottom:18px;}
+  .footer-info p{color:var(--slate);font-size:15px;line-height:1.6;margin-bottom:28px;max-width:40ch;}
+  .contact-line{font-family:var(--mono);font-size:14px;margin-bottom:8px;}
+  .contact-line a:hover{color:var(--ping);}
+
+  form{display:grid;gap:16px;}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media (max-width:520px){ .form-row{grid-template-columns:1fr;} }
+  label{font-family:var(--mono);font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:var(--slate);display:block;margin-bottom:7px;}
+  input[type="text"],input[type="tel"],select,textarea{
+    width:100%;background:transparent;border:none;border-bottom:1px solid var(--line);
+    padding:10px 2px;font-family:var(--body);font-size:15px;color:var(--ink);
+    outline:none;transition:border-color .2s;
+    appearance:none;-webkit-appearance:none;border-radius:0;
+  }
+  input:focus,textarea:focus,select:focus{border-color:var(--ink);}
+  textarea{resize:vertical;min-height:70px;}
+  .submit-btn{
+    justify-self:start;margin-top:8px;
+    font-family:var(--mono);font-size:13.5px;
+    background:var(--ink);color:var(--paper);
+    padding:15px 30px;border-radius:2px;border:1px solid var(--ink);cursor:pointer;
+    transition:background .2s,color .2s;
+  }
+  .submit-btn:hover{background:transparent;color:var(--ink);}
+
+  .foot-bottom{
+    display:flex;justify-content:space-between;align-items:center;
+    border-top:1px solid var(--line);margin-top:80px;padding-top:26px;
+    font-family:var(--mono);font-size:12px;color:var(--slate);flex-wrap:wrap;gap:12px;
+  }
+
+  .reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease, transform .6s ease;}
+  .reveal.in{opacity:1;transform:none;}
+
+  /* ---------- Partners strip ---------- */
+  .partners{padding:56px 0;border-bottom:1px solid var(--line);}
+  .partners-head{
+    display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap;
+    margin-bottom:30px;
+  }
+  .partners-head p{font-family:var(--mono);font-size:12px;color:var(--slate);letter-spacing:0.03em;}
+  .partners-row{
+    display:flex;flex-wrap:wrap;gap:14px;
+  }
+  .partner-chip{
+    font-family:var(--mono);font-size:14px;letter-spacing:0.01em;
+    border:1px solid var(--line);border-radius:2px;
+    padding:14px 20px;color:var(--ink);
+    display:flex;align-items:center;gap:10px;
+    transition:border-color .2s, background .2s;
+  }
+  .partner-chip:hover{border-color:var(--ink);background:var(--paper-2);}
+  .partner-chip .p-dot{width:6px;height:6px;border-radius:50%;background:var(--ping);flex-shrink:0;}
+  .partner-chip .p-sub{color:var(--slate);font-size:12px;}
+
+  /* ---------- Courier gallery ---------- */
+  .gallery{background:var(--paper-2);}
+  .gallery-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+    background:var(--line);border:1px solid var(--line);
+  }
+  @media (max-width:860px){ .gallery-grid{grid-template-columns:1fr;} }
+  .gallery-card{background:var(--paper);padding:0;overflow:hidden;position:relative;}
+  .gallery-card svg{width:100%;height:auto;display:block;}
+  .gallery-caption{
+    padding:20px 22px 26px;
+  }
+  .gallery-caption .g-eyebrow{font-family:var(--mono);font-size:11px;color:var(--ping);letter-spacing:0.05em;text-transform:uppercase;}
+  .gallery-caption h3{font-size:18px;font-family:var(--body);font-weight:600;margin-top:8px;}
+  .gallery-caption p{font-size:13.5px;color:var(--slate);margin-top:6px;line-height:1.5;}
+
+  /* ---------- Referral program ---------- */
+  .referral{background:var(--ink);color:var(--paper);}
+  .referral-grid{display:grid;grid-template-columns:0.9fr 1.1fr;gap:56px;align-items:center;}
+  @media (max-width:900px){ .referral-grid{grid-template-columns:1fr;gap:40px;} }
+  .referral-figure{
+    border:1px solid var(--line-dark);border-radius:3px;padding:34px 30px;background:var(--ink-soft);
+  }
+  .referral-figure .amount{
+    font-family:var(--display);font-size:clamp(44px,6vw,64px);color:var(--paper);line-height:1;
+  }
+  .referral-figure .amount span{color:var(--signal);}
+  .referral-figure .amount-label{
+    font-family:var(--mono);font-size:12px;letter-spacing:0.04em;color:var(--slate-light);
+    margin-top:14px;line-height:1.5;
+  }
+  .referral-steps{margin-top:26px;border-top:1px solid var(--line-dark);padding-top:20px;}
+  .referral-steps li{
+    font-family:var(--mono);font-size:12.5px;color:var(--slate-light);line-height:1.8;
+    padding-left:18px;position:relative;
+  }
+  .referral-steps li::before{content:"—";position:absolute;left:0;color:var(--signal);}
+  .referral-note{
+    margin-top:22px;font-size:12px;color:var(--slate-light);line-height:1.6;
+    border-top:1px solid var(--line-dark);padding-top:18px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <div class="logo"><span class="dot"></span>РАДАР</div>
+    <nav class="nav-links">
+      <a href="#zarabotok">Заработок</a>
+      <a href="#process">Как начать</a>
+      <a href="#why">Условия</a>
+      <a href="#referral">Приведи курьера</a>
+      <a href="#contact">Заявка</a>
+    </nav>
+    <a href="#contact" class="nav-cta">Стать курьером</a>
+    <button class="burger" id="burger" aria-label="Открыть меню">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="mobile-menu wrap" id="mobileMenu">
+    <a href="#zarabotok">Заработок</a>
+    <a href="#process">Как начать</a>
+    <a href="#why">Условия</a>
+    <a href="#referral">Приведи курьера</a>
+    <a href="#contact">Заявка</a>
+    <a href="#contact" class="nav-cta">Стать курьером</a>
+  </div>
+</header>
+
+<section class="hero" id="zarabotok">
+  <div class="wrap hero-top">
+    <div>
+      <p class="eyebrow on-dark">Набор курьеров · бесплатное обучение</p>
+      <h1>Первая смена — <em>через 2 дня</em> после заявки.</h1>
+      <p class="lede">РАДАР устраивает пеших, вело- и автокурьеров в крупные сервисы доставки. Опыт не нужен — обучаем за один день бесплатно. Оформление официальное, выплаты каждую неделю.</p>
+      <div class="hero-ctas">
+        <a href="#contact" class="btn-primary">Оставить заявку →</a>
+        <a href="#process" class="btn-ghost">Как начать</a>
+      </div>
+    </div>
+
+    <div class="calc">
+      <div class="calc-label">Сколько можно заработать</div>
+      <div class="calc-transport">
+        <button class="t-btn active" data-rate="280" data-name="Пеший">Пеший</button>
+        <button class="t-btn" data-rate="340" data-name="Велокурьер">Велокурьер</button>
+        <button class="t-btn" data-rate="430" data-name="Автокурьер">Автокурьер</button>
+      </div>
+      <div class="calc-slider-row">
+        <span class="hours-out" id="hoursOut">30 часов в неделю</span>
+      </div>
+      <input type="range" min="10" max="60" value="30" step="5" id="hoursSlider">
+      <div class="calc-result">
+        <div class="calc-result-item">
+          <div class="num"><span id="weekOut">8 400</span> ₽</div>
+          <div class="lbl">в неделю</div>
+        </div>
+        <div class="calc-result-item">
+          <div class="num"><span id="monthOut">36 100</span> ₽</div>
+          <div class="lbl">в месяц</div>
+        </div>
+      </div>
+      <div class="calc-note">Расчёт ориентировочный, по среднему тарифу партнёров РАДАР за 2025 год. Точная ставка зависит от города и загрузки.</div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="hero-stats">
+      <div>
+        <div class="stat-num"><span>1</span> день</div>
+        <div class="stat-label">бесплатное<br>обучение</div>
+      </div>
+      <div>
+        <div class="stat-num"><span>2</span> дня</div>
+        <div class="stat-label">от заявки<br>до первой смены</div>
+      </div>
+      <div>
+        <div class="stat-num">каждую <span>нед.</span></div>
+        <div class="stat-label">выплаты<br>без задержек</div>
+      </div>
+      <div>
+        <div class="stat-num"><span>100</span>%</div>
+        <div class="stat-label">кандидатов без опыта<br>берём в работу</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="partners">
+  <div class="wrap">
+    <div class="partners-head reveal">
+      <p class="eyebrow">Куда устраиваем</p>
+      <p>Набираем курьеров на площадки крупнейших сервисов доставки в России</p>
+    </div>
+    <div class="partners-row reveal">
+      <div class="partner-chip"><span class="p-dot"></span>Яндекс Лавка</div>
+      <div class="partner-chip"><span class="p-dot"></span>Самокат</div>
+      <div class="partner-chip"><span class="p-dot"></span>ВкусВилл</div>
+      <div class="partner-chip"><span class="p-dot"></span>Купер</div>
+      <div class="partner-chip"><span class="p-dot"></span>X5 Group <span class="p-sub">· доставка готовой еды</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="process" id="process">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <p class="eyebrow on-dark">Как начать</p>
+      <h2>От заявки до первой зарплаты — четыре шага</h2>
+      <p>Никаких многодневных собеседований — большинство доходит до первой смены за два дня.</p>
+    </div>
+    <div class="process-list">
+      <div class="process-item reveal">
+        <div class="p-num">01</div>
+        <h3>Заявка</h3>
+        <p class="p-desc">Оставляете телефон и город — перезваниваем в течение часа в рабочее время, без анкет и тестов.</p>
+      </div>
+      <div class="process-item reveal">
+        <div class="p-num">02</div>
+        <h3>Собеседование по телефону</h3>
+        <p class="p-desc">15 минут по телефону, без визита в офис: рассказываем про график, тариф и подходящий тип доставки — пешком, на велосипеде или авто.</p>
+      </div>
+      <div class="process-item reveal">
+        <div class="p-num">03</div>
+        <h3>Бесплатное обучение</h3>
+        <p class="p-desc">Один день: приложение, маршруты, работа с заказом и клиентом. Обучение оплачивается нами, а не вычитается из вашей ставки.</p>
+      </div>
+      <div class="process-item reveal">
+        <div class="p-num">04</div>
+        <h3>Первая смена с наставником</h3>
+        <p class="p-desc">На первой смене рядом опытный курьер — помогает освоиться на маршруте. Дальше — самостоятельный график и стабильный доход.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="why">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <p class="eyebrow">Условия работы</p>
+      <h2>Что вы получаете, работая через РАДАР</h2>
+    </div>
+    <div class="why-grid">
+      <div class="why-item reveal">
+        <h3>Бесплатное обучение</h3>
+        <p>Учим работать с приложением, маршрутами и клиентами за один день — обучение оплачиваем сами, без вычетов из будущей ставки.</p>
+      </div>
+      <div class="why-item reveal">
+        <h3>Гибкий график</h3>
+        <p>Сами выбираете смены — от нескольких часов в день до полной занятости. Можно совмещать с учёбой или другой работой.</p>
+      </div>
+      <div class="why-item reveal">
+        <h3>Выплаты каждую неделю</h3>
+        <p>Без задержек и без ожидания конца месяца — деньги за отработанные смены поступают на карту раз в неделю.</p>
+      </div>
+      <div class="why-item reveal">
+        <h3>Официальное оформление</h3>
+        <p>Регистрация как ИП на НПД — все документы и отчисления оформляем за вас. Выплаты приходят на расчётный счёт, открытый на ваше ИП.</p>
+      </div>
+      <div class="why-item reveal">
+        <h3>Экипировка и техника</h3>
+        <p>Термосумка, форма и держатель для телефона — выдаём бесплатно на старте, ничего покупать не нужно.</p>
+      </div>
+      <div class="why-item reveal">
+        <h3>Поддержка на маршруте</h3>
+        <p>Если что-то пошло не так на смене — на связи куратор, который решает вопрос сразу, а не через тикет-систему.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="referral" id="referral">
+  <div class="wrap">
+    <div class="referral-grid">
+      <div class="referral-figure reveal">
+        <div class="amount">до <span>60 000 ₽</span></div>
+        <div class="amount-label">за каждого приведённого курьера, вышедшего на постоянную работу</div>
+        <div class="amount-label" style="margin-top:6px;color:var(--slate-light);opacity:0.85;">Итоговая сумма зависит от города, типа доставки и других условий</div>
+        <ul class="referral-steps">
+          <li>Приводите знакомого — оставляете его контакт в заявке</li>
+          <li>Он проходит бесплатное обучение и выходит на смены</li>
+          <li>Вознаграждение начисляется поэтапно, по мере его выхода на смены</li>
+        </ul>
+        <div class="referral-note">Выплата приходит на расчётный счёт ИП на НПД — как и основной доход, без дополнительного оформления.</div>
+      </div>
+      <div class="reveal">
+        <p class="eyebrow on-dark">Зарабатывайте больше</p>
+        <h2 style="margin-top:16px;">Приводите курьеров — получайте отдельную выплату</h2>
+        <p class="lede" style="margin-top:18px;margin-bottom:30px;">Помимо своих смен, можно зарабатывать на привлечении новых курьеров в РАДАР. Чем больше приведённых людей закрепляется на постоянной работе, тем выше суммарное вознаграждение — без ограничения по количеству приглашённых. Точная сумма выплаты за каждого курьера зависит от города и типа доставки.</p>
+        <a href="#contact" class="btn-primary">Узнать условия →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="gallery">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <p class="eyebrow">Три формата работы</p>
+      <h2>Выбирайте, как развозить заказы</h2>
+      <p>Тариф и график зависят от типа доставки — расскажем подробнее на собеседовании.</p>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="gallery-grid">
+
+      <div class="gallery-card reveal">
+        <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+          <rect width="400" height="300" fill="#E5E3D6"/>
+          <rect y="230" width="400" height="70" fill="#DAD7C6"/>
+          <circle cx="330" cy="60" r="34" fill="#EFEEE4"/>
+          <rect x="60" y="150" width="60" height="6" fill="#C9C6B4"/>
+          <rect x="150" y="120" width="40" height="36" fill="#C9C6B4"/>
+          <g>
+            <circle cx="180" cy="240" r="4" fill="#131E22"/>
+            <rect x="176" y="175" width="8" height="60" rx="4" fill="#131E22"/>
+            <rect x="150" y="150" width="60" height="20" rx="6" fill="#7FA88F"/>
+            <circle cx="180" cy="130" r="16" fill="#131E22"/>
+            <rect x="158" y="168" width="44" height="34" rx="5" fill="#C4622F"/>
+            <rect x="150" y="200" width="18" height="45" rx="4" fill="#131E22" transform="rotate(18 150 200)"/>
+            <rect x="205" y="200" width="18" height="45" rx="4" fill="#131E22" transform="rotate(-10 205 200)"/>
+          </g>
+        </svg>
+        <div class="gallery-caption">
+          <div class="g-eyebrow">Формат 01</div>
+          <h3>Пеший курьер</h3>
+          <p>Заказы в пределах района, термосумка выдаётся бесплатно. Подходит для старта без транспорта.</p>
+        </div>
+      </div>
+
+      <div class="gallery-card reveal">
+        <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+          <rect width="400" height="300" fill="#EFEEE4"/>
+          <rect y="235" width="400" height="65" fill="#E2DFCF"/>
+          <rect x="40" y="180" width="90" height="5" fill="#D2CFBD"/>
+          <rect x="260" y="90" width="5" height="90" fill="#D2CFBD"/>
+          <g>
+            <circle cx="150" cy="235" r="32" fill="none" stroke="#131E22" stroke-width="6"/>
+            <circle cx="255" cy="235" r="32" fill="none" stroke="#131E22" stroke-width="6"/>
+            <path d="M150 235 L195 160 L230 160" fill="none" stroke="#131E22" stroke-width="6" stroke-linecap="round"/>
+            <path d="M195 160 L165 235" fill="none" stroke="#131E22" stroke-width="6" stroke-linecap="round"/>
+            <path d="M255 235 L215 235 L195 160" fill="none" stroke="#131E22" stroke-width="6" stroke-linecap="round"/>
+            <circle cx="200" cy="120" r="15" fill="#131E22"/>
+            <rect x="205" y="150" width="46" height="34" rx="5" fill="#7FA88F"/>
+            <rect x="175" y="130" width="28" height="18" rx="4" fill="#C4622F"/>
+          </g>
+        </svg>
+        <div class="gallery-caption">
+          <div class="g-eyebrow">Формат 02</div>
+          <h3>Велокурьер</h3>
+          <p>Больше заказов за смену и выше тариф. Свой велосипед — плюс, но экипировку и держатель телефона выдаём мы.</p>
+        </div>
+      </div>
+
+      <div class="gallery-card reveal">
+        <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+          <rect width="400" height="300" fill="#E5E3D6"/>
+          <rect y="235" width="400" height="65" fill="#DAD7C6"/>
+          <rect x="30" y="120" width="60" height="4" fill="#C9C6B4"/>
+          <rect x="310" y="150" width="50" height="4" fill="#C9C6B4"/>
+          <g>
+            <rect x="90" y="165" width="200" height="55" rx="14" fill="#131E22"/>
+            <rect x="120" y="140" width="110" height="35" rx="10" fill="#131E22"/>
+            <rect x="140" y="148" width="70" height="20" rx="4" fill="#7FA88F"/>
+            <circle cx="140" cy="222" r="20" fill="#EFEEE4" stroke="#131E22" stroke-width="6"/>
+            <circle cx="250" cy="222" r="20" fill="#EFEEE4" stroke="#131E22" stroke-width="6"/>
+            <rect x="270" y="175" width="22" height="16" rx="3" fill="#C4622F"/>
+          </g>
+        </svg>
+        <div class="gallery-caption">
+          <div class="g-eyebrow">Формат 03</div>
+          <h3>Автокурьер</h3>
+          <p>Дальние и крупные заказы, самый высокий тариф. Нужны личный автомобиль и права категории B.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="testimonials">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <p class="eyebrow">Отзывы курьеров</p>
+      <h2>Что говорят те, кто уже работает</h2>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="test-grid">
+      <div class="test-card reveal">
+        <blockquote>«Пришёл без опыта, за день обучили работать с приложением. Через неделю уже вышел на нормальный доход».</blockquote>
+        <div class="who">Пеший курьер, 4 месяца в РАДАР</div>
+      </div>
+      <div class="test-card reveal">
+        <blockquote>«Совмещаю с учёбой — беру смены по вечерам и на выходных. Куратор всегда на связи, если возникает вопрос».</blockquote>
+        <div class="who">Велокурьер, 7 месяцев в РАДАР</div>
+      </div>
+      <div class="test-card reveal">
+        <blockquote>«Оформили как самозанятого за один день, экипировку выдали сразу. Деньги приходят стабильно, каждую неделю».</blockquote>
+        <div class="who">Автокурьер, 1 год в РАДАР</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="requirements-wrap" style="padding-top:0;">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <p class="eyebrow">Требования</p>
+      <h2>Кому подходит эта работа</h2>
+    </div>
+    <div class="req-wrap">
+      <div class="req-card reveal">
+        <h3>Что нужно для старта</h3>
+        <ul class="req-list">
+          <li>Возраст от 18 лет</li>
+          <li>Смартфон с интернетом</li>
+          <li>Опыт работы не требуется</li>
+          <li>Для велокурьеров — свой велосипед; для автокурьеров — авто и права</li>
+        </ul>
+      </div>
+      <div class="req-card reveal">
+        <h3>Кому особенно подходит</h3>
+        <ul class="req-list">
+          <li>Студентам — гибкий график вокруг учёбы</li>
+          <li>Тем, кто ищет подработку на вечер или выходные</li>
+          <li>Тем, кто хочет попробовать работу без долгих собеседований</li>
+          <li>Тем, кому нужен стабильный еженедельный доход прямо сейчас</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-banner">
+  <div class="wrap">
+    <p class="eyebrow on-dark" style="justify-content:center;">Начать работать</p>
+    <h2 style="margin-top:18px;">Оставьте заявку — перезвоним в течение часа и запишем на обучение</h2>
+    <a href="#contact" class="btn-primary">Оставить заявку →</a>
+  </div>
+</section>
+
+<footer id="contact">
+  <div class="wrap footer-grid">
+    <div class="footer-info reveal">
+      <p class="eyebrow">Заявка на обучение</p>
+      <h2 style="margin-top:16px;">Начните работать курьером</h2>
+      <p>Заполните форму — перезвоним в рабочее время, ответим на вопросы и запишем на ближайшее бесплатное обучение.</p>
+      <div class="contact-line">Телефон: <a href="tel:+74951234567">+7 (495) 123-45-67</a></div>
+      <div class="contact-line">Почта: <a href="mailto:kuriers@radar-hr.ru">kuriers@radar-hr.ru</a></div>
+      <div class="contact-line">Набор идёт в Москве и ещё 22 городах</div>
+    </div>
+
+    <form class="reveal" onsubmit="event.preventDefault(); this.querySelector('.submit-btn').textContent='Заявка отправлена';">
+      <div class="form-row">
+        <div>
+          <label for="name">Имя</label>
+          <input id="name" type="text" placeholder="Как к вам обращаться" required>
+        </div>
+        <div>
+          <label for="phone">Телефон</label>
+          <input id="phone" type="tel" placeholder="+7 ___ ___-__-__" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label for="city">Город</label>
+          <input id="city" type="text" placeholder="Ваш город">
+        </div>
+        <div>
+          <label for="transport">Тип доставки</label>
+          <select id="transport">
+            <option>Пеший курьер</option>
+            <option>Велокурьер</option>
+            <option>Автокурьер</option>
+            <option>Ещё не решил(а)</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label for="details">Комментарий</label>
+        <textarea id="details" placeholder="Например, удобное время для звонка"></textarea>
+      </div>
+      <button class="submit-btn" type="submit">Отправить заявку</button>
+    </form>
+  </div>
+
+  <div class="wrap foot-bottom">
+    <span>© 2026 РАДАР — набор курьеров</span>
+    <span>Политика конфиденциальности · Договор оферты</span>
+  </div>
+</footer>
+
+<script>
+  const burger = document.getElementById('burger');
+  const menu = document.getElementById('mobileMenu');
+  burger.addEventListener('click', () => menu.classList.toggle('open'));
+  menu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => menu.classList.remove('open')));
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // income calculator
+  const tButtons = document.querySelectorAll('.t-btn');
+  const hoursSlider = document.getElementById('hoursSlider');
+  const hoursOut = document.getElementById('hoursOut');
+  const weekOut = document.getElementById('weekOut');
+  const monthOut = document.getElementById('monthOut');
+
+  let rate = 280;
+  function fmt(n){ return Math.round(n).toLocaleString('ru-RU'); }
+  function recalc(){
+    const hours = parseInt(hoursSlider.value, 10);
+    hoursOut.textContent = hours + ' ' + (hours === 1 ? 'час' : 'часов') + ' в неделю';
+    const week = rate * hours;
+    const month = week * 4.3;
+    weekOut.textContent = fmt(week);
+    monthOut.textContent = fmt(month);
+  }
+  tButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      rate = parseInt(btn.dataset.rate, 10);
+      recalc();
+    });
+  });
+  hoursSlider.addEventListener('input', recalc);
+  recalc();
+</script>
+
+</body>
+</html>
